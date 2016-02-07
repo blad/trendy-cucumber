@@ -1,0 +1,34 @@
+{
+  "name": "trendy-cucumber",
+  "version": "0.0.1",
+  "description": "Cucumber Report Generator",
+  "main": "index.js",
+  "bin": {
+    "trendy-cucumber": "index.js"
+  },
+  "scripts": {
+    "test": "mocha ./tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/blad/trendy-cucumber.git"
+  },
+  "keywords": [
+    "cucumber",
+    "gherkin",
+    "test",
+    "reporting"
+  ],
+  "author": "Bladymir Tellez <btellez@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/blad/trendy-cucumber/issues"
+  },
+  "homepage": "https://github.com/blad/trendy-cucumber#readme",
+  "devDependencies": {
+    "mocha": "^2.4.5"
+  },
+  "dependencies": {
+    "cli-table": "^0.3.1"
+  }
+}
