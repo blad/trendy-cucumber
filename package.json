@@ -1,6 +1,6 @@
 {
   "name": "trendy-cucumber",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Cucumber Report Generator",
   "main": "index.js",
   "bin": {
