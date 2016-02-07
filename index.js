@@ -1,14 +1,31 @@
 var fs = require('fs');
 var Table = require('cli-table');
 
-var inputFile = process.argv[2];
+(function main() {
+  var inputFile = process.argv[2];
 
-if (!inputFile) {
-  console.log('You must provide the path to the feature test results.','\n');
-  console.log('Example:', 'trendy-cucumber ./feature-results.json', '\n');
-  process.exit(1);
-}
+  if (!inputFile) {
+    console.log('You must provide the path to the feature test results.','\n');
+    console.log('Example:', 'trendy-cucumber ./feature-results.json', '\n');
+    process.exit(1);
+  }
 
+  readFile(inputFile, (json) => {
+      displayHighLevelMetrics(json);
+      displayFeatureMetrics(json);
+  });
+})();
+
+
+/**
+ * Read the provided filename.
+ *
+ * If an error occurs while reading the file, then the function logs an error
+ * and returns, not error callback is called.
+ *
+ * @param fileName  {String} path to the cucumber json results
+ * @param onSuccess {Function} that accepts a JSON object of the read contents.
+ */
 function readFile(fileName, onSuccess) {
   fs.readFile(fileName, (error, data) => {
     if (!error) {
@@ -19,6 +36,15 @@ function readFile(fileName, onSuccess) {
   });
 };
 
+
+/**
+ * Initialize a Summary Object for Features and Scenarios
+ *
+ * Objcect defines, total, passing, and failing counts for features, and
+ * scenarios.
+ *
+ * @return  {Object}
+ */
 function initHighLevelMetricsObject() {
   return {
     features: {
@@ -34,6 +60,13 @@ function initHighLevelMetricsObject() {
   }
 }
 
+
+/**
+ * Extract High Level Metrics for Features and Scenarios.
+ *
+ * @param   jsonResults - {Object} containing test results for cucumber tests.
+ * @return  {Object} of High Level Metrics with Counts based on input file.
+ */
 function extractHighLevelMetrics(jsonResults) {
   var metrics = initHighLevelMetricsObject();
 
@@ -57,6 +90,13 @@ function extractHighLevelMetrics(jsonResults) {
   return metrics;
 }
 
+
+/**
+ * Returns an object with starting value for name, uri of a feature, and
+ * total, passing, and failing counts of scenarios within the feature.
+ *
+ * @return {Object} of metrics for a scenarios within a single feature.
+ */
 function initFeatureMetricsObject() {
   return {
       name: '',
@@ -67,6 +107,13 @@ function initFeatureMetricsObject() {
   };
 }
 
+
+/**
+ * Extract metrics for individual metrics.
+ *
+ * @param   jsonResults - {Object} containing test results for cucumber tests.
+ * @return  {Array} of {Object} containing metrics for each feature.
+ */
 function extractFeatureMetrics(jsonResults) {
   var featureMetrics = [];
 
@@ -90,6 +137,13 @@ function extractFeatureMetrics(jsonResults) {
   return featureMetrics;
 }
 
+
+/**
+ * Helper method that helps to determine if the scenario passed.
+ *
+ * @param steps - {Array} containing the {Object} of results of each step.
+ * @return {Boolean} indicating if the scenario passed.
+ */
 function didScenarioPass(steps) {
   var totalPassed = steps.reduce((total, step) => {
     return total + (step.result.status === 'passed' ? 1 : 0);
@@ -98,6 +152,27 @@ function didScenarioPass(steps) {
   return totalPassed == steps.length;
 }
 
+
+/**
+ * Calculate the percent and return a formatted string.
+ *
+ * @param   numerator - {Number}
+ * @param   numerator - {Denominator}
+ * @results {String} of the percentage to 2 decimal places
+ */
+function percent(numerator, denominator) {
+    if (denominator == 0) {
+      return '0%';
+    }
+    return (100 * numerator / denominator).toFixed(2) + '%';
+}
+
+/**
+ * Parse the High Level Metrics into a row for the table.
+ *
+ * @param   metric - {Object} containing: passing, failing, total counts
+ * @results {Array} containing: # Passing, % Passing, # Failing, % Failing, Total
+ */
 function printableRow(metric) {
   var passing = metric.passing;
   var failing = metric.failing;
@@ -105,9 +180,24 @@ function printableRow(metric) {
   return [passing, percent(passing, total), failing, percent(failing, total), total];
 }
 
+
+/**
+ * Display the High Level Metrics given the JSON test results
+ *
+ * @param   json - {Object} test results.
+ */
 function displayHighLevelMetrics(json) {
   var metrics = extractHighLevelMetrics(json);
-  var table = new Table({ head: ["", "Passed", "% Passed", 'Failed', '% Failed', 'Total'] });
+  var table = new Table({
+    head: [
+      '',
+      'Passed',
+      '% Passed',
+      'Failed',
+      '% Failed',
+      'Total'
+    ]
+  });
 
   table.push(
       {'Features': printableRow(metrics.features)},
@@ -117,27 +207,62 @@ function displayHighLevelMetrics(json) {
   console.log(table.toString());
 }
 
-function percent(numerator, denominator) {
-    if (denominator == 0) {
-      return '0%';
-    }
-    return (100 * numerator / denominator).toFixed(2) + '%';
+/**
+ * Returns a function to be used with `Array.reduce`.
+ *
+ * @param   {String} key used to access a key within the object
+ * @return  {Function} that sums all items with a given key.
+ */
+function sumWithKey(key) {
+  return (total, current) => {
+    return total + current[key];
+  }
 }
 
+/**
+ * Parse the Feature Metrics into a row for the table.
+ *
+ * Note: All percentages are in relation to the grand total.
+ *
+ * @param   metric - {Object} containing: passing, failing, total scenario counts
+ *                   for a single feature.
+ * @param   grandTotal - totalNumber of Scenarios accross all features.
+ * @results {Array} containing: # Passing, % Passing, # Failing, % Failing, % of Grand Total
+ */
 function printableFeatureRow(metric, grandTotal) {
   var passing = metric.passing;
   var failing = metric.failing;
   var total = metric.total;
-  return [passing, percent(passing, grandTotal), failing, percent(failing, grandTotal), percent(total, grandTotal)];
+  return [
+    passing,
+    percent(passing, grandTotal),
+    failing,
+    percent(failing, grandTotal),
+    percent(total, grandTotal)
+  ];
 }
 
+
+/**
+ * Display the Feature Metrics given the JSON test results
+ *
+ * @param   json - {Object} test results.
+ */
 function displayFeatureMetrics(json) {
   var metrics = extractFeatureMetrics(json);
-  var totalScenarios = metrics.reduce((total, current) => { return total + current.total;}, 0);
-  var totalPassingScenarios = metrics.reduce((total, current) => { return total + current.passing;}, 0);
-  var totalFailingScenarios = metrics.reduce((total, current) => { return total + current.failing;}, 0);
-
-  var table = new Table({ head: ["Feature Name", "Scenarios Passed", "% Scenarios Passed", 'Scenarios Failed', '% Scenarios Failed', '% Total'] });
+  var totalScenarios = metrics.reduce(sumWithKey('total'), 0);
+  var totalPassingScenarios = metrics.reduce(sumWithKey('passing'), 0);
+  var totalFailingScenarios = metrics.reduce(sumWithKey('failing'), 0);
+  var table = new Table({
+    head: [
+      'Feature Name',
+      'Scenarios Passed',
+      '% Scenarios Passed',
+      'Scenarios Failed',
+      '% Scenarios Failed',
+      '% Total'
+    ]
+  });
 
   metrics.forEach((featureMetrics) => {
     var value = {};
@@ -145,15 +270,14 @@ function displayFeatureMetrics(json) {
     table.push(value);
   });
 
-  var totalsRow = [
-    '', totalPassingScenarios, percent(totalPassingScenarios, totalScenarios),
-    totalFailingScenarios, percent(totalFailingScenarios, totalScenarios), '100%'
-  ]
-  table.push(totalsRow)
+  table.push([
+    '',
+    totalPassingScenarios,
+    percent(totalPassingScenarios, totalScenarios),
+    totalFailingScenarios,
+    percent(totalFailingScenarios, totalScenarios),
+    '100%'
+  ]);
+
   console.log(table.toString());
 }
-
-readFile(inputFile, (json) => {
-    displayHighLevelMetrics(json);
-    displayFeatureMetrics(json);
-});
