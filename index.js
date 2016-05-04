@@ -50,7 +50,8 @@ function initHighLevelMetricsObject() {
     features: {
       total: 0,
       passing: 0,
-      failing: 0
+      failing: 0,
+      empty: 0
     },
     scenarios: {
       total: 0,
@@ -72,6 +73,11 @@ function extractHighLevelMetrics(jsonResults) {
 
   jsonResults.forEach((result) => {
     metrics.features.total += 1;
+
+    if (!result.elements) {
+      metrics.features.empty += 1;
+      return;
+    }
 
     var hasFailingScenario = false;
     result.elements.forEach((element) => {
@@ -121,6 +127,10 @@ function extractFeatureMetrics(jsonResults) {
     var metrics = initFeatureMetricsObject()
     metrics.name = result.name;
     metrics.uri = result.uri;
+
+    if (!result.elements) {
+      return;
+    }
 
     result.elements.forEach((element) => {
       if (element.type === 'scenario') { // Avoid Counting Backgrounds
