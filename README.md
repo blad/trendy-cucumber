@@ -48,6 +48,9 @@ Trendy Cucumber accepts json input. You can generate json output specify the `--
 cucumberjs --format json:./test/feature-test-results.json
 ```
 
+## Requirements
+Require node `4.0.0` or higher
+
 ## License (MIT)
 
 ```
