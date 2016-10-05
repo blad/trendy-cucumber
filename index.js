@@ -1,8 +1,12 @@
 var fs = require('fs');
 var Table = require('cli-table');
+var json2csv = require('json2csv');
+
+var argv = require('minimist')(process.argv.slice(2));
 
 (function main() {
-  var inputFile = process.argv[2];
+  var inputFile = argv._[0];
+  var exportCsv = argv.e;
 
   if (!inputFile) {
     console.log('You must provide the path to the feature test results.','\n');
@@ -11,8 +15,21 @@ var Table = require('cli-table');
   }
 
   readFile(inputFile, (json) => {
-      displayHighLevelMetrics(json);
-      displayFeatureMetrics(json);
+      var highLevelMetrics = displayHighLevelMetrics(json);
+      var featureMetrics = displayFeatureMetrics(json);
+
+      if (exportCsv) {
+        fs.writeFile(
+          'high_level_metrics.csv',
+          tableToCsv(highLevelMetrics),
+          (err) => err && console.error(err)
+        );
+        fs.writeFile(
+          'feature_metrics.csv',
+          tableToCsv(featureMetrics),
+          (err) => err && console.error(err)
+        );
+      }
   });
 })();
 
@@ -215,6 +232,8 @@ function displayHighLevelMetrics(json) {
   );
 
   console.log(table.toString());
+
+  return table;
 }
 
 /**
@@ -290,4 +309,29 @@ function displayFeatureMetrics(json) {
   ]);
 
   console.log(table.toString());
+
+  return table;
+}
+
+/**
+ * Get CSV string result from Table instance
+ *
+ * @param   table - {Table} table to convert
+ * @results {String} - CSV result
+ */
+function tableToCsv(table) {
+  var fields = table.options.head.map((field) => {
+    return field || '_';
+  });
+  var data = table.map((row) => {
+    var r = row instanceof Array ? row : row[Object.keys(row)[0]];
+    return fields.reduce((memo, field, index) => {
+      memo[field] = r[index];
+      return memo;
+    }, {});
+  });
+  return json2csv({
+    fields: fields,
+    data: data
+  });
 }
