@@ -98,7 +98,7 @@ function extractHighLevelMetrics(jsonResults) {
 
     var hasFailingScenario = false;
     result.elements.forEach((element) => {
-      if (element.type === 'scenario') { // Avoid Counting Backgrounds
+      if (element.keyword === 'Scenario') { // Avoid Counting Backgrounds
         var passed = didScenarioPass(element.steps);
         metrics.scenarios.total += 1; // Tally Scenario Total
         metrics.scenarios.passing += passed ? 1 : 0;
