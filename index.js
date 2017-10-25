@@ -267,6 +267,7 @@ function printableFeatureRow(metric, grandTotal) {
     percent(passing, grandTotal),
     failing,
     percent(failing, grandTotal),
+    total,
     percent(total, grandTotal)
   ];
 }
@@ -289,6 +290,7 @@ function displayFeatureMetrics(json) {
       '% Scenarios Passed',
       'Scenarios Failed',
       '% Scenarios Failed',
+      'Total',
       '% Total'
     ]
   });
@@ -305,6 +307,7 @@ function displayFeatureMetrics(json) {
     percent(totalPassingScenarios, totalScenarios),
     totalFailingScenarios,
     percent(totalFailingScenarios, totalScenarios),
+    totalScenarios,
     '100%'
   ]);
 
