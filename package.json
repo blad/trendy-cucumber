@@ -6,6 +6,9 @@
   "bin": {
     "trendy-cucumber": "index.js"
   },
+  "engines": {
+    "node": ">= 4.0.0"
+  },
   "scripts": {
     "test": "mocha ./tests"
   },
