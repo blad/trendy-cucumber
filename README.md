@@ -4,6 +4,8 @@
 
 
 # Trendy Cucumber
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fblad%2Ftrendy-cucumber.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fblad%2Ftrendy-cucumber?ref=badge_shield)
+
 Cucumber Reporting Tool to Generate Summaries from Test Results
 
 
@@ -70,3 +72,6 @@ HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTIO
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
+
+
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fblad%2Ftrendy-cucumber.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fblad%2Ftrendy-cucumber?ref=badge_large)
